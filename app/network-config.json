@@ -1,0 +1,55 @@
+{
+	"network-config": {
+		"orderer": {
+			"url": "grpcs://localhost:7050",
+			"server-hostname": "orderer.iscr.com",
+			"tls_cacerts": "../artifacts/channel/crypto-config/ordererOrganizations/iscr.com/orderers/orderer.iscr.com/tls/ca.crt"
+		},
+		"agent": {
+			"name": "peerAgent",
+			"mspid": "AgentMSP",
+			"ca": "https://localhost:7054",
+			"peers": {
+				"peer1": {
+					"requests": "grpcs://localhost:7051",
+					"events": "grpcs://localhost:7053",
+					"server-hostname": "peer0.agent.iscr.com",
+					"tls_cacerts": "../artifacts/channel/crypto-config/peerOrganizations/agent.iscr.com/peers/peer0.agent.iscr.com/tls/ca.crt"
+				},
+				"peer2": {
+					"requests": "grpcs://localhost:7056",
+					"events": "grpcs://localhost:7058",
+					"server-hostname": "peer1.agent.iscr.com",
+					"tls_cacerts": "../artifacts/channel/crypto-config/peerOrganizations/agent.iscr.com/peers/peer1.agent.iscr.com/tls/ca.crt"
+				}	
+			},
+			"admin": {
+				"key": "../artifacts/channel/crypto-config/peerOrganizations/agent.iscr.com/users/Admin@agent.iscr.com/msp/keystore",
+				"cert": "../artifacts/channel/crypto-config/peerOrganizations/agent.iscr.com/users/Admin@agent.iscr.com/msp/signcerts"
+			}
+		},
+		"illinois": {
+			"name": "peerIllinois",
+			"mspid": "IllinoisMSP",
+			"ca": "https://localhost:8054",
+			"peers": {
+				"peer1": {
+					"requests": "grpcs://localhost:8051",
+					"events": "grpcs://localhost:8053",
+					"server-hostname": "peer0.illinois.iscr.com",
+					"tls_cacerts": "../artifacts/channel/crypto-config/peerOrganizations/illinois.iscr.com/peers/peer0.illinois.iscr.com/tls/ca.crt"
+				},
+				"peer2": {
+					"requests": "grpcs://localhost:8056",
+					"events": "grpcs://localhost:8058",
+					"server-hostname": "peer1.illinois.iscr.com",
+					"tls_cacerts": "../artifacts/channel/crypto-config/peerOrganizations/illinois.iscr.com/peers/peer1.illinois.iscr.com/tls/ca.crt"
+				}	
+			},
+			"admin": {
+				"key": "../artifacts/channel/crypto-config/peerOrganizations/illinois.iscr.com/users/Admin@illinois.iscr.com/msp/keystore",
+				"cert": "../artifacts/channel/crypto-config/peerOrganizations/illinois.iscr.com/users/Admin@illinois.iscr.com/msp/signcerts"
+			}
+		}
+	}
+}

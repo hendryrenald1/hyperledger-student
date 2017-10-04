@@ -1,0 +1,132 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+services:
+
+  ca.agent.iscr.com:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.agent.iscr.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/5ae555930bbad6ebb551352f2cfb129b6fb8e74946d8e7ac8cd8f69a01e92bc1_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.agent.iscr.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/5ae555930bbad6ebb551352f2cfb129b6fb8e74946d8e7ac8cd8f69a01e92bc1_sk
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/agent.iscr.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerAgent
+
+  ca.illinois.iscr.com:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.illinois.iscr.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/380716ca2b145e0774d06735b70ef0f87ed6bcedea3f2a0508172eae6ef649fc_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.illinois.iscr.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/380716ca2b145e0774d06735b70ef0f87ed6bcedea3f2a0508172eae6ef649fc_sk
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/illinois.iscr.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerIllinois
+
+  orderer.iscr.com:
+    container_name: orderer.iscr.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/crypto/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peerAgent/tls/ca.crt, /etc/hyperledger/crypto/peerIllinois/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderers
+    command: orderer
+    ports:
+      - 7050:7050
+    volumes:
+        - ./channel:/etc/hyperledger/configtx
+        - ./channel/crypto-config/ordererOrganizations/iscr.com/orderers/orderer.iscr.com/:/etc/hyperledger/crypto/orderer
+        - ./channel/crypto-config/peerOrganizations/agent.iscr.com/peers/peer0.agent.iscr.com/:/etc/hyperledger/crypto/peerAgent
+        - ./channel/crypto-config/peerOrganizations/illinois.iscr.com/peers/peer0.illinois.iscr.com/:/etc/hyperledger/crypto/peerIllinois
+
+  peer0.agent.iscr.com:
+    container_name: peer0.agent.iscr.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.agent.iscr.com
+      - CORE_PEER_LOCALMSPID=AgentMSP
+      - CORE_PEER_ADDRESS=peer0.agent.iscr.com:7051
+    ports:
+      - 7051:7051
+      - 7053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/agent.iscr.com/peers/peer0.agent.iscr.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.iscr.com
+
+  peer1.agent.iscr.com:
+    container_name: peer1.agent.iscr.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.agent.iscr.com
+      - CORE_PEER_LOCALMSPID=AgentMSP
+      - CORE_PEER_ADDRESS=peer1.agent.iscr.com:7051
+    ports:
+      - 7056:7051
+      - 7058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/agent.iscr.com/peers/peer1.agent.iscr.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.iscr.com
+
+  peer0.illinois.iscr.com:
+    container_name: peer0.illinois.iscr.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.illinois.iscr.com
+      - CORE_PEER_LOCALMSPID=IllinoisMSP
+      - CORE_PEER_ADDRESS=peer0.illinois.iscr.com:7051
+    ports:
+      - 8051:7051
+      - 8053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/illinois.iscr.com/peers/peer0.illinois.iscr.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.iscr.com
+
+  peer1.illinois.iscr.com:
+    container_name: peer1.illinois.iscr.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.illinois.iscr.com
+      - CORE_PEER_LOCALMSPID=IllinoisMSP
+      - CORE_PEER_ADDRESS=peer1.illinois.iscr.com:7051
+    ports:
+      - 8056:7051
+      - 8058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/illinois.iscr.com/peers/peer1.illinois.iscr.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.iscr.com
