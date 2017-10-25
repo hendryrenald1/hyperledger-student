@@ -31,7 +31,16 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 		' ============\n');
 
 	var channel = helper.getChannelForOrg(org);
+
+	logger.info("##################### Channel ###################");
+	logger.info(channel)
+
+
 	var client = helper.getClientForOrg(org);
+
+	logger.info("###################### Client #######################");
+	logger.info(client)
+
 
 	return helper.getOrgAdmin(org).then((user) => {
 		// read the config block from the orderer for the channel
@@ -42,6 +51,7 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 		logger.error('Failed to enroll user \'' + username + '\'. ' + err);
 		throw new Error('Failed to enroll user \'' + username + '\'. ' + err);
 	}).then((success) => {
+
 		tx_id = client.newTransactionID();
 		// send proposal to endorser
 		var request = {
@@ -51,16 +61,24 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 			txId: tx_id
 		};
 
+		logger.info("##############################################");
+		logger.info(" Successfully passed one line ")
+		logger.info(request)
+
 		if (functionName)
 			request.fcn = functionName;
 
-		return channel.sendInstantiateProposal(request);
+		return channel.sendInstantiateProposal(request,3600000);
 	}, (err) => {
 		logger.error('Failed to initialize the channel');
 		throw new Error('Failed to initialize the channel');
 	}).then((results) => {
+		logger.info("##############################################");
+		logger.info ("Channel Initilization has been successfull");		
 		var proposalResponses = results[0];
+		logger.info(" Proposal Response " + proposalResponses )
 		var proposal = results[1];
+		logger.info(" Proposal  " + proposal )
 		var all_good = true;
 		for (var i in proposalResponses) {
 			let one_good = false;
