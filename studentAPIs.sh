@@ -123,7 +123,7 @@ echo
 
 
 
-echo "POST to Create Student in the ledger"
+echo "POST to  Create Student in the ledger"
 echo
 TRX_ID=$(curl -s -X POST \
   http://localhost:4000/channels/mychannel/chaincodes/studentcc \
