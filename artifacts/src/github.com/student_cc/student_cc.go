@@ -133,7 +133,7 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Failed to set asset: %s", args[0])
 	}
-	return args[1], nil
+	return string(args[1]), nil
 }
 
 // Set stores the asset (both key and value) on the ledger. If the key exists,
@@ -178,7 +178,7 @@ func add(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	if ledgererr != nil {
 		return "", fmt.Errorf("Failed to set asset: %s", args[0])
 	}
-	return args[1], nil
+	return string(args[1]), nil
 }
 
 // Get returns the value of the specified asset key
