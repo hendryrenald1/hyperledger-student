@@ -7,8 +7,8 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
@@ -18,15 +18,16 @@ import (
 type SimpleAsset struct {
 }
 
-
-type University struct {
-	UName string
+type Student struct {
+	Name         string
+	id           int
+	age          int
+	Universities []University
 }
 
-
-type Student struct {
-    Name string
-    Universities []University
+type University struct {
+	UName     string
+	UAddreess string
 }
 
 var logger = shim.NewLogger("student_cc")
@@ -36,51 +37,9 @@ var logger = shim.NewLogger("student_cc")
 // or to migrate data.
 func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	// Get the args from the transaction proposal
-	_, args := stub.GetFunctionAndParameters()
 
-	fmt.Println(":: Argument from NodeJS application %s and %s :" , args[0], args[1])
-	fmt.Println(":: Length of the Argument %d", len(args))
-
-	logger.Info("########### Student Init ###########")
-	logger.Info(args[0])
-	logger.Info(args[1])
-
-	studentNo := args[0];
-	studentInfo := args[1]
-
-	if len(args) != 2 {
-		return shim.Error("Incorrect arguments. Expecting a key and a value")
-	}
-
-// Sample code to check if it working
-	res1D := &Student{
-        Name:   "Testing",
-        Universities: []University{University{UName :"First University"},University{UName :"Second University"} }}
-    res1B, _ := json.Marshal(res1D)
-    fmt.Println(" Modified  " , string(res1B))
-
-	res := &Student{}
-	
-	json.Unmarshal([]byte(studentInfo), &res)
-
-		fmt.Println("Modified String",res)
-		
-		
-		responseToWrite, _ := json.Marshal(res)
-
-	// Set up any variables or assets here by calling stub.PutState()
-
-	// We store the key and the value on the ledger
-	err := stub.PutState(studentNo, []byte(responseToWrite))
-	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to create asset: %s", studentNo))
-	} else {
-		logger.Info(" Successfully written to Ledger with paramater as")
-		logger.Info(studentNo)
-	}
-	
 	return shim.Success([]byte(studentNo))
-	
+
 }
 
 // Invoke is called per transaction on the chaincode. Each transaction is
@@ -92,6 +51,11 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	var result string
 	var err error
+
+	if fn == "create" {
+		result, err = create(stub, args)
+	}
+
 	if fn == "add" {
 		result, err = add(stub, args)
 	} else { // assume 'get' even if fn is nil
@@ -103,6 +67,59 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	// Return the result as success payload
 	return shim.Success([]byte(result))
+}
+
+/*
+Create the student info
+*/
+
+func create(stub shim.ChaincodeStubInterface, args []string) (string, error) {
+	if len(args) != 2 {
+		return "", fmt.Errorf("Incorrect arguments. Expecting a key and a value")
+	}
+
+	_, args := stub.GetFunctionAndParameters()
+
+	fmt.Println(":: Argument from NodeJS application %s and %s :", args[0], args[1])
+	fmt.Println(":: Length of the Argument %d", len(args))
+
+	logger.Info("########### Student Init ###########")
+	logger.Info(args[0])
+	logger.Info(args[1])
+
+	studentNo := args[0]
+	studentInfo := args[1]
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect arguments. Expecting a key and a value")
+	}
+
+	// Sample code to check if it working
+	res1D := &Student{
+		Name:         "Testing",
+		Universities: []University{University{UName: "First University"}, University{UName: "Second University"}}}
+	res1B, _ := json.Marshal(res1D)
+	fmt.Println(" Modified  ", string(res1B))
+
+	res := &Student{}
+
+	json.Unmarshal([]byte(studentInfo), &res)
+
+	fmt.Println("Modified String", res)
+
+	responseToWrite, _ := json.Marshal(res)
+
+	// Set up any variables or assets here by calling stub.PutState()
+
+	// We store the key and the value on the ledger
+	err := stub.PutState(studentNo, []byte(responseToWrite))
+	if err != nil {
+		return shim.Error(fmt.Sprintf("Failed to create asset: %s", studentNo))
+	} else {
+		logger.Info(" Successfully written to Ledger with paramater as")
+		logger.Info(studentNo)
+	}
+
 }
 
 // Set stores the asset (both key and value) on the ledger. If the key exists,
@@ -141,23 +158,21 @@ func add(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	}
 	// After Error check, Unmarshall to the Student data
 
-	fmt.Println("Restrived Student In JSON format :", student )
+	fmt.Println("Restrived Student In JSON format :", student)
 
 	stud := &Student{}
 	json.Unmarshal([]byte(student), &stud)
 
-	fmt.Println("Restrived Student After Unmarshalling :", stud )
+	fmt.Println("Restrived Student After Unmarshalling :", stud)
 
 	//Append the University
-	stud.Universities = append(stud.Universities,*univ) 
+	stud.Universities = append(stud.Universities, *univ)
 
-	fmt.Println("Restrived Student After Appending Univesity :", stud )
-
+	fmt.Println("Restrived Student After Appending Univesity :", stud)
 
 	updatedstudjson, _ := json.Marshal(stud)
-	
-	fmt.Println("Student information after Marshalling and before updating :", stud )
-	
+
+	fmt.Println("Student information after Marshalling and before updating :", stud)
 
 	ledgererr := stub.PutState(args[0], []byte(updatedstudjson))
 	if ledgererr != nil {
@@ -165,7 +180,6 @@ func add(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	}
 	return args[1], nil
 }
-
 
 // Get returns the value of the specified asset key
 func get(stub shim.ChaincodeStubInterface, args []string) (string, error) {
