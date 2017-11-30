@@ -137,27 +137,6 @@ echo "Transacton ID is $TRX_ID"
 echo
 echo
 
-echo "POST invoke chaincode on both the peers"
-echo
-TRX_ID=$(curl -s -X POST \
-  http://localhost:4000/channels/mychannel/chaincodes/studentcc \
-  -H "authorization: Bearer $ORG1_TOKEN" \
-  -H "content-type: application/json" \
-  -d '{
-	"fcn":"add",
-	"args":["a", "{\"UName\":\"First University\"}"]
-}')
-echo "Transacton ID is $TRX_ID"
-echo
-echo
 
-echo "GET query chaincode on peer1 of Org1"
-echo
-curl -s -X GET \
-  "http://localhost:4000/channels/mychannel/chaincodes/studentcc?peer=peer1&fcn=get&args=%5B%22a%22%5D" \
-  -H "authorization: Bearer $ORG1_TOKEN" \
-  -H "content-type: application/json"
-echo
-echo
 
 echo "Total execution time : $(($(date +%s)-starttime)) secs ..."
