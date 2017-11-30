@@ -52,11 +52,13 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	var result string
 	var err error
 
+	logger.Info("Function Name returned %s", fn)
+
 	if fn == "create" {
 		result, err = create(stub, args)
 	} else if fn == "add" {
 		result, err = add(stub, args)
-	} else { // assume 'get' even if fn is nil
+	} else if fn == "get" {
 		result, err = get(stub, args)
 	}
 	if err != nil {
@@ -102,7 +104,7 @@ func create(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 
 	json.Unmarshal([]byte(studentInfo), &res)
 
-	fmt.Println("Modified String", res)
+	logger.Info("Modified String %s", res)
 
 	responseToWrite, _ := json.Marshal(res)
 
