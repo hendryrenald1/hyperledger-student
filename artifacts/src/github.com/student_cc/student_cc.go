@@ -38,7 +38,7 @@ var logger = shim.NewLogger("student_cc")
 func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	// Get the args from the transaction proposal
 
-	return shim.Success([]byte(studentNo))
+	return shim.Success(nil)
 
 }
 
@@ -78,20 +78,21 @@ func create(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 		return "", fmt.Errorf("Incorrect arguments. Expecting a key and a value")
 	}
 
-	_, args := stub.GetFunctionAndParameters()
+	_, init_args := stub.GetFunctionAndParameters()
 
 	fmt.Println(":: Argument from NodeJS application %s and %s :", args[0], args[1])
 	fmt.Println(":: Length of the Argument %d", len(args))
 
 	logger.Info("########### Student Init ###########")
-	logger.Info(args[0])
-	logger.Info(args[1])
+	logger.Info(init_args[0])
+	logger.Info(init_args[1])
 
-	studentNo := args[0]
-	studentInfo := args[1]
+	studentNo := init_args[0]
+	studentInfo := init_args[1]
 
-	if len(args) != 2 {
-		return shim.Error("Incorrect arguments. Expecting a key and a value")
+	if len(init_args) != 2 {
+		return "", fmt.Errorf("Incorrect arguments. Expecting a key and a value")
+		//	return shim.Error("")
 	}
 
 	// Sample code to check if it working
@@ -114,12 +115,13 @@ func create(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	// We store the key and the value on the ledger
 	err := stub.PutState(studentNo, []byte(responseToWrite))
 	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to create asset: %s", studentNo))
+		//	return shim.Error(fmt.Sprintf("Failed to create asset: %s", studentNo))
+		return "", fmt.Errorf("Failed to create asset: %s", studentNo)
 	} else {
 		logger.Info(" Successfully written to Ledger with paramater as")
 		logger.Info(studentNo)
 	}
-
+	return init_args[1], nil
 }
 
 // Set stores the asset (both key and value) on the ledger. If the key exists,
