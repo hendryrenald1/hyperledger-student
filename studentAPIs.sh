@@ -114,14 +114,27 @@ curl -s -X POST \
   -H "content-type: application/json" \
   -d '{
 	"chaincodeName":"studentcc",
-	"chaincodeVersion":"v0",
-	"args":["a","{\"Name\":\"Testing\"}"]
+	"chaincodeVersion":"v0"
 }'
 
-
+   
 echo
-echo "Press any Key to Add  the chain code"
-read 
+
+
+
+echo "POST to Create Student in the ledger"
+echo
+TRX_ID=$(curl -s -X POST \
+  http://localhost:4000/channels/mychannel/chaincodes/studentcc \
+  -H "authorization: Bearer $ORG1_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{
+	"fcn":"create",
+	"args":["a", "{\"UName\":\"First University\"}"]
+}')
+echo "Transacton ID is $TRX_ID"
+echo
+echo
 
 echo "POST invoke chaincode on both the peers"
 echo
