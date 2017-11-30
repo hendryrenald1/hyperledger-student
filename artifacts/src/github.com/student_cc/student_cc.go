@@ -92,21 +92,25 @@ func create(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 		return "", fmt.Errorf("Incorrect arguments. Expecting a key and a value")
 		//	return shim.Error("")
 	}
-
-	// Sample code to check if it working
-	res1D := &Student{
-		Name:         "Testing",
-		Universities: []University{University{UName: "First University"}, University{UName: "Second University"}}}
-	res1B, _ := json.Marshal(res1D)
-	fmt.Println(" Modified  ", string(res1B))
+	/*
+		// Sample code to check if it working
+		res1D := &Student{
+			Name:         "Testing",
+			Universities: []University{University{UName: "First University"}, University{UName: "Second University"}}}
+		res1B, _ := json.Marshal(res1D)
+		fmt.Println(" Modified  ", string(res1B))
+	*/
 
 	res := &Student{}
 
-	json.Unmarshal([]byte(studentInfo), &res)
-
-	logger.Info("Modified String %s", res)
+	errUnMarshall := json.Unmarshal([]byte(studentInfo), &res)
+	if errUnMarshall != nil {
+		logger.Info(errUnMarshall)
+	}
 
 	responseToWrite, _ := json.Marshal(res)
+
+	logger.Info("Afer Marshalling %s", responseToWrite)
 
 	// Set up any variables or assets here by calling stub.PutState()
 
@@ -119,7 +123,7 @@ func create(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 		logger.Info(" Successfully written to Ledger with paramater as")
 		logger.Info(studentNo)
 	}
-	return args[1], nil
+	return string(args[1]), nil
 }
 
 // Set stores the asset (both key and value) on the ledger. If the key exists,
