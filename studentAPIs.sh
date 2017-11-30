@@ -114,10 +114,11 @@ curl -s -X POST \
   -H "content-type: application/json" \
   -d '{
 	"chaincodeName":"studentcc",
-	"chaincodeVersion":"v0"
+	"chaincodeVersion":"v0",
+	"args":["a","{\"Name\":\"Testing\"}"]
 }'
 
-   
+
 echo
 
 
