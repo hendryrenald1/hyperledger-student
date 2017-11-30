@@ -54,9 +54,7 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	if fn == "create" {
 		result, err = create(stub, args)
-	}
-
-	if fn == "add" {
+	} else if fn == "add" {
 		result, err = add(stub, args)
 	} else { // assume 'get' even if fn is nil
 		result, err = get(stub, args)
