@@ -53,6 +53,7 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	var err error
 
 	logger.Info("Function Name returned %s", fn)
+	logger.Info("Paramater Returned :%s", args)
 
 	if fn == "create" {
 		result, err = create(stub, args)
